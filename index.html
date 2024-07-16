@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveillance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-black text-gray-100 min-h-screen overflow-hidden">
+    <div class="container mx-auto p-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-white">Surveillance Dashboard</h1>
+        </header>
+
+        <div class="flex items-end justify-between gap-8">
+            <!-- Left Column -->
+            <div class="space-y-8 ">
+                <div class="bg-[#0c0c0] rounded-xl shadow-lg p-6 hover:bg-[#0f0f0f] duration-300 ease">
+                    <h2 class="text-xl font-semibold mb-4 text-white">System Details</h2>
+                    <div class="space-y-2">
+                        <p><i class="fas fa-map-marker-alt mr-2 text-white"></i> Main Entrance</p>
+                        <p><i class="fas fa-camera mr-2 text-white"></i> CAM001</p>
+                        <p><i class="fas fa-calendar-alt mr-2 text-white"></i> <span id="current-date"></span></p>
+                        <p><i class="fas fa-clock mr-2 text-white"></i> <span id="current-time"></span></p>
+                    </div>
+                </div>
+
+                <div class="bg-[#0c0c0] rounded-xl shadow-lg p-6 hover:bg-[#0f0f0f] duration-300 ease">
+                    <h2 class="text-xl font-semibold mb-4 text-white">System Status</h2>
+                    <p id="status" class="text-green-400"><i class="fas fa-check-circle mr-2"></i> All Clear</p>
+                </div>
+
+                <div class="bg-[#0c0c0] rounded-xl shadow-lg p-6 hover:bg-[#0f0f0f] duration-300 ease">
+                    <h2 class="text-xl font-semibold mb-4 text-white">Alerts</h2>
+                    <p id="alerts" class="text-red-400 hidden"><i class="fas fa-exclamation-triangle mr-2"></i> Unusual
+                        Activity Detected!</p>
+                    <p id="no-alerts"><i class="fas fa-bell-slash mr-2 text-gray-400"></i> No alerts</p>
+                </div>
+            </div>
+
+            <!-- Middle Column -->
+            <div class="md:col-span-2 lg:col-span-2 ">
+                <div class="bg-[#0c0c0] rounded-xl shadow-lg p-6 hover:bg-[#0f0f0f] duration-300 ease">
+                    <h2 class="text-xl font-semibold mb-4 text-white">Video Feed</h2>
+                    <div class="mb-4 flex space-x-4">
+                        <button id="live-btn"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 transition">Live
+                            Feed</button>
+                        <button id="upload-btn"
+                            class="px-4 py-2 bg-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50 transition">Upload
+                            Video</button>
+                    </div>
+                    <div id="video-upload" class="hidden mb-4">
+                        <label for="file-upload"
+                            class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg inline-block transition hover:bg-blue-600">
+                            <i class="fas fa-cloud-upload-alt mr-2"></i>Choose Video File
+                        </label>
+                        <input id="file-upload" type="file" accept="video/*" class="hidden">
+                        <span id="file-name" class="ml-2 text-gray-400"></span>
+                    </div>
+                    <div id="video-container"
+                        class="bg-gray-700 h-96 flex items-center justify-center rounded-lg overflow-hidden">
+                        <video id="video-feed" class="h-full w-full object-cover" autoplay muted></video>
+                    </div>
+                    <p id="detection-details" class="mt-4 text-gray-400">Detected objects: 0</p>
+                </div>
+            </div>
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <div class="bg-[#0c0c0] rounded-xl shadow-lg p-6 hover:bg-[#0f0f0f] duration-300 ease">
+                    <h2 class="text-xl font-semibold mb-4 text-white">Detection Summary</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-4 bg-gray-700 rounded-lg">
+                            <p class="text-3xl font-bold text-white" id="person-count">0</p>
+                            <p class="text-sm text-gray-400">Persons</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-700 rounded-lg">
+                            <p class="text-3xl font-bold text-white" id="car-count">0</p>
+                            <p class="text-sm text-gray-400">Cars</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-700 rounded-lg col-span-2">
+                            <p class="text-3xl font-bold text-white" id="unusual-count">0</p>
+                            <p class="text-sm text-gray-400">Unusual Activities</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[#0c0c0] rounded-xl shadow-lg p-6 hover:bg-[#0f0f0f] duration-300 ease">
+                    <h2 class="text-xl font-semibold mb-4 text-white">Recent Detections</h2>
+                    <ul id="recent-detections" class="space-y-2 text-gray-300">
+                        <li class="text-gray-500">No recent detections</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Update date and time
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Video source selection
+        const liveBtn = document.getElementById('live-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const videoUpload = document.getElementById('video-upload');
+        const videoFeed = document.getElementById('video-feed');
+        const fileUpload = document.getElementById('file-upload');
+        const fileName = document.getElementById('file-name');
+
+        liveBtn.addEventListener('click', () => {
+            liveBtn.classList.remove('bg-gray-600');
+            liveBtn.classList.add('bg-blue-500');
+            uploadBtn.classList.remove('bg-blue-500');
+            uploadBtn.classList.add('bg-gray-600');
+            videoUpload.classList.add('hidden');
+            startWebcam();
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            uploadBtn.classList.remove('bg-gray-600');
+            uploadBtn.classList.add('bg-blue-500');
+            liveBtn.classList.remove('bg-blue-500');
+            liveBtn.classList.add('bg-gray-600');
+            videoUpload.classList.remove('hidden');
+            stopWebcam();
+        });
+
+        fileUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileName.textContent = e.target.files[0].name;
+                videoFeed.src = URL.createObjectURL(e.target.files[0]);
+            }
+        });
+
+        // Webcam functions
+        function startWebcam() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    videoFeed.srcObject = stream;
+                })
+                .catch(error => {
+                    console.error("Error accessing the webcam", error);
+                });
+        }
+
+        function stopWebcam() {
+            const stream = videoFeed.srcObject;
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                videoFeed.srcObject = null;
+            }
+        }
+
+        // Start with live feed
+        startWebcam();
+
+
+        // Simulating detection updates (replace with actual data in a real implementation)
+        function simulateDetections() {
+            const personCount = Math.floor(Math.random() * 10);
+            const carCount = Math.floor(Math.random() * 5);
+            const unusualCount = Math.floor(Math.random() * 3);
+
+            document.getElementById('person-count').textContent = personCount;
+            document.getElementById('car-count').textContent = carCount;
+            document.getElementById('unusual-count').textContent = unusualCount;
+
+            document.getElementById('detection-details').textContent = `Detected objects: ${personCount + carCount + unusualCount}`;
+
+            const recentDetections = document.getElementById('recent-detections');
+            recentDetections.innerHTML = '';
+            const detectionTypes = ['Person', 'Car', 'Unusual Activity'];
+            for (let i = 0; i < 5; i++) {
+                const li = document.createElement('li');
+                const type = detectionTypes[Math.floor(Math.random() * detectionTypes.length)];
+                li.textContent = `${type} at (${Math.floor(Math.random() * 640)}, ${Math.floor(Math.random() * 480)})`;
+                recentDetections.appendChild(li);
+            }
+
+            const status = document.getElementById('status');
+            const alerts = document.getElementById('alerts');
+            const noAlerts = document.getElementById('no-alerts');
+
+            if (unusualCount > 0) {
+                status.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i> Active';
+                status.classList.remove('text-green-500');
+                status.classList.add('text-yellow-500');
+                alerts.classList.remove('hidden');
+                noAlerts.classList.add('hidden');
+            } else {
+                status.innerHTML = '<i class="fas fa-check-circle mr-2"></i> All Clear';
+                status.classList.remove('text-yellow-500');
+                status.classList.add('text-green-500');
+                alerts.classList.add('hidden');
+                noAlerts.classList.remove('hidden');
+            }
+        }
+        setInterval(simulateDetections, 5000);
+        simulateDetections();
+    </script>
+</body>
+
+</html>
